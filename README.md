@@ -40,7 +40,7 @@ When Messenger calls your receiving webhook, you'll need to log the data with Wo
 __Note__: Wordhop can pause your bot so that it doesn't auto response while a human has taken over. The server response from your `hopIn` request will pass the `paused` state. Use that to stop your bot from responding to an incoming message. Here is an example:
 
 ```ruby
- hopInResponse = Wordhop.hopIn(message.messaging)
+hopInResponse = Wordhop.hopIn(message.messaging)
 if hopInResponse['paused'] != true
 # proceed to process incoming message
  ...
@@ -92,6 +92,7 @@ if text == 'help'
     # send a Wordhop alert to your slack channel
     # that the user could use assistance
     Wordhop.assistanceRequested(message.messaging)
+    ...
 ```
 
 Go back to Slack and wait for alerts. That's it! 
