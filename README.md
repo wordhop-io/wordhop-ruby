@@ -15,7 +15,7 @@ With Wordhop you can sync up your Ruby-based Chatbot to Slack, so you can retain
 ### Installation
 
 ```bash
-$ gem install facebook-messenger
+$ gem install wordhop
 ```
 
 
