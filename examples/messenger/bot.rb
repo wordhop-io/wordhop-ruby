@@ -1,17 +1,23 @@
+require 'dotenv'
+Dotenv.load
+
 require 'facebook/messenger'
 require 'rubygems'
-require '../../wordhop'
+require 'wordhop'
 
 include Facebook::Messenger
 include Wordhop
 
-
+Wordhop.token = ENV['ACCESS_TOKEN']
+Wordhop.clientkey = ENV['WORDHOP_CLIENT_KEY']
+Wordhop.apikey = ENV['WORDHOP_API_KEY']
+Wordhop.platform = "messenger"
 
 Wordhop.on :'chat response' do |data|
     Bot.deliver(data, access_token: ENV['ACCESS_TOKEN'])
 end
 
-def sendMessage(message, data)
+def sendIt(message, data)
     payload = {
         recipient: message.sender,
         message: data
@@ -24,79 +30,22 @@ Bot.on :message do |message|
   puts "Received '#{message.inspect}' from #{message.sender}"
   
   hopInResponse = Wordhop.hopIn(message.messaging)
-
+  # If your bot is paused, stop it from replying
   if hopInResponse['paused'] != true
-      
       case message.text
       when /hello/i
-        sendMessage(message,
-          text: 'Hello, human!',
-          quick_replies: [
-            {
-              content_type: 'text',
-              title: 'Hello, bot!',
-              payload: 'HELLO_BOT'
-            }
-          ]
-        )
-        puts message.inspect
-      when /something humans like/i
-        sendMessage(message,
-          text: 'I found something humans seem to like:'
-        )
-        
-        sendMessage(message,
-          attachment: {
-            type: 'image',
-            payload: {
-              url: 'https://i.imgur.com/iMKrDQc.gif'
-            }
-          }
-        )
-
-        sendMessage(message,
-          attachment: {
-            type: 'template',
-            payload: {
-              template_type: 'button',
-              text: 'Did human like it?',
-              buttons: [
-                { type: 'postback', title: 'Yes', payload: 'HUMAN_LIKED' },
-                { type: 'postback', title: 'No', payload: 'HUMAN_DISLIKED' }
-              ]
-            }
-          }
-        )
+        sendIt(message, text: 'Hello there.')
+      when /help/i
+        # let the user know that they are being routed to a human
+        sendIt(message, text: 'Hang tight. Let me see what I can do.')
+        # send a Wordhop alert to your slack channel
+        # that the user could use assistance
         Wordhop.assistanceRequested(message.messaging)
-
       else
-        sendMessage(message,
-          text: 'You are now marked for extermination.'
-        )
-
-        sendMessage(message,
-          text: 'Have a nice day.'
-        )
+        # let the user know that the bot does not understand
+        sendIt(message, text: 'Huh?')
+        # capture conversational dead-ends.
         Wordhop.logUnknownIntent(message.messaging)
-
       end
     end
-end
-
-
-Bot.on :postback do |postback|
-  case postback.payload
-  when 'HUMAN_LIKED'
-    text = 'That makes bot happy!'
-  when 'HUMAN_DISLIKED'
-    text = 'Oh.'
-  end
-
-  sendMessage(postback,
-    text: text
-  )
-end
-
-Bot.on :delivery do |delivery|
-  puts "Delivered message(s) #{delivery.ids}"
 end

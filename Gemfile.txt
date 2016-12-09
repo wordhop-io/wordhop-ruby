@@ -1,0 +1,9 @@
+source 'http://rubygems.org'
+
+gemspec
+
+group :development, :test do
+  gem 'rubygems'
+  gem 'socket.io-client-simple'
+  gem 'httparty'
+end

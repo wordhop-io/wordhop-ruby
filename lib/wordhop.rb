@@ -11,11 +11,48 @@ module Wordhop
     end
     
     EVENTS = [:'chat response', :'socket_id_set'].freeze
-    WORDHOP_API_KEY = ENV['WORDHOP_API_KEY']
-    WORDHOP_CLIENT_KEY = ENV['WORDHOP_CLIENT_KEY']
-    WORDHOP_HEADERS = {'apikey':WORDHOP_API_KEY,'clientkey':WORDHOP_CLIENT_KEY,'platform':'messenger', 'token': ENV['ACCESS_TOKEN']}
     
     class << self
+    
+        attr_accessor :apikey, :clientkey, :token, :platform
+
+        def initialize
+            @apikey
+            @clientkey
+            @token
+            @platform
+        end
+        
+        def new(*args, &block)
+            obj = allocate
+            obj.initialize(*args, &block)
+            obj
+        end
+    
+        # Return a Hash of hooks.
+        def apikey
+            @apikey ||= ENV['WORDHOP_API_KEY']
+        end
+        
+        def clientkey
+            @clientkey ||= ENV['WORDHOP_CLIENT_KEY']
+        end
+        
+        def token
+            @token ||= ENV['ACCESS_TOKEN']
+        end
+        
+        def platform
+            @platform ||= "messenger"
+        end
+        
+        def headers
+            @headers = {'apikey':apikey,'clientkey':clientkey,'platform':platform, 'token': token}
+        end
+        
+        def hooks
+            @hooks ||= {}
+        end
     
         socket = SocketIO::Client::Simple.connect 'https://wordhop-socket-server.herokuapp.com'
         
@@ -24,7 +61,7 @@ module Wordhop
             x = {'socket_id': socket_id, 'clientkey': WORDHOP_CLIENT_KEY}
             options = {
                 body: x,
-                headers: WORDHOP_HEADERS
+                headers: headers
             }
             Partay.post('/update_bot_socket_id', options)
         end
@@ -35,11 +72,6 @@ module Wordhop
             messageData = {'recipient': {'id': channel},'message': {'text': text}}
             Wordhop.hopOut(messageData)
             Wordhop.trigger(:'chat response', messageData)
-        end
-
-        # Return a Hash of hooks.
-        def hooks
-            @hooks ||= {}
         end
 
         def on(event, &block)
@@ -59,26 +91,25 @@ module Wordhop
 
         def hopIn(x)
             puts 'hopIn'
-            options = {'body':x, 'headers':WORDHOP_HEADERS}
+            options = {'body':x, 'headers':headers}
             return Partay.post('/in', options)
         end
             
         def hopOut(x)
-            puts x
             puts 'hopOut'
-            options = {'body':x, 'headers':WORDHOP_HEADERS}
+            options = {'body':x, 'headers':headers}
             return Partay.post('/out', options)
         end
             
         def logUnknownIntent(x)
             puts 'logUnknownIntent'
-            options = {'body':x, 'headers':WORDHOP_HEADERS}
+            options = {'body':x, 'headers':headers}
             return Partay.post('/unknown', options)
         end
             
         def assistanceRequested(x)
             puts 'assistanceRequested'
-            options = {'body':x, 'headers':WORDHOP_HEADERS}
+            options = {'body':x, 'headers':headers}
             return Partay.post('/human', options)
         end
     end
