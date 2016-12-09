@@ -1,7 +1,7 @@
 # [Wordhop](https://www.wordhop.io) - Monitor and Optimize Your Conversational Experience
-## For Chatbots Built in Python
+## For Chatbots Built in Ruby
 
-With Wordhop you can sync up your Python-based Chatbot to Slack, so you can retain your users without ever leaving Slack.  Wordhop monitors your Chatbot for friction in your conversational experience and alerts you on Slack in real-time. Simply add Wordhop to Slack and then drop in a couple of lines of code into your Chatbot.  Wordhop integrates in minutes, not days, and begins working immediately.  From Slack, you can pause and take over your bot, then hand the conversation back to your bot.  Actionable analytics also show you and your Slack team where you can optimize your conversational experience and measure results. 
+With Wordhop you can sync up your Ruby-based Chatbot to Slack, so you can retain your users without ever leaving Slack.  Wordhop monitors your Chatbot for friction in your conversational experience and alerts you on Slack in real-time. Simply add Wordhop to Slack and then drop in a couple of lines of code into your Chatbot.  Wordhop integrates in minutes, not days, and begins working immediately.  From Slack, you can pause and take over your bot, then hand the conversation back to your bot.  Actionable analytics also show you and your Slack team where you can optimize your conversational experience and measure results. 
 
 ### What you can do with Wordhop:
 * [See Key Features](https://developer.wordhop.io)
