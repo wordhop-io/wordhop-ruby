@@ -34,6 +34,7 @@ $ export WORDHOP_CLIENT_KEY=xxxxxxxxxxxxxxxxxxxx
 $ export ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
+Add the Wordhop class to your code and set the required parameter values.
 ```ruby
 require 'wordhop'
 
