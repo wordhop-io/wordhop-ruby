@@ -39,7 +39,7 @@ module Wordhop
         end
         
         def token
-            @token ||= ENV['ACCESS_TOKEN']
+            @token ||= ENV['ACCESS_TOKEN'] ||= ''
         end
         
         def platform

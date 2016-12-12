@@ -14,7 +14,10 @@ Wordhop.apikey = ENV['WORDHOP_API_KEY']
 Wordhop.platform = "messenger"
 
 Wordhop.on :'chat response' do |data|
-    Bot.deliver(data, access_token: ENV['ACCESS_TOKEN'])
+    channel = data['channel']
+    text = data['text']
+    payload = {'recipient': {'id': channel},'message': {'text': text}}
+    Bot.deliver(payload, access_token: ENV['ACCESS_TOKEN'])
 end
 
 def sendIt(message, data)
