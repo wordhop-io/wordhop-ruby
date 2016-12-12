@@ -121,7 +121,7 @@ def sendIt(channel, text)
     # schema matches Messenger
     outgoingMessage = {recipient: {id: channel},message: {text: text}}
     Wordhop.hopOut(outgoingMessage)
-    bot.send_text_message(channel, text) # <= example of bot sending reply
+    client.say({'text': text, 'channel': channel})  # <= example of bot sending reply
     ...
 ```
 
@@ -156,7 +156,9 @@ To enable the ability to have a human take over your bot, add the following code
 ```ruby
 # Handle forwarding the messages sent by a human through your bot
 Wordhop.on :'chat response' do |data|
-    Bot.deliver(data, access_token: ENV['ACCESS_TOKEN'])  # <= example of bot sending message
+    text = data['text']
+    channel = data['channel']
+    client.say({'text': text, 'channel': channel})  # <= example of bot sending message
 end
 ```
 
