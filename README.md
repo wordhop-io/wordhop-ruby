@@ -1,7 +1,7 @@
 # [Wordhop](https://www.wordhop.io) - Monitor and Optimize Your Conversational Experience
 ## For Chatbots Built in Ruby
 
-With Wordhop you can sync up your Ruby-based Chatbot to Slack, so you can retain your users without ever leaving Slack.  Wordhop monitors your Chatbot for friction in your conversational experience and alerts you on Slack in real-time. Simply add Wordhop to Slack and then drop in a couple of lines of code into your Chatbot.  Wordhop integrates in minutes, not days, and begins working immediately.  From Slack, you can pause and take over your bot, then hand the conversation back to your bot.  Actionable analytics also show you and your Slack team where you can optimize your conversational experience and measure results. 
+Wordhop monitors your Chatbot for friction in your conversational experience and alerts you on Slack in real-time. Simply add Wordhop to Slack and then drop in a couple of lines of code into your Chatbot.  Wordhop integrates in minutes, and begins working immediately.  From Slack, you can see full transcripts of all your bot's conversations, pause and take over your bot, then hand the conversation back to your bot.  Actionable analytics also show you and your Slack team where you can optimize your conversational experience and measure results. 
 
 ### What you can do with Wordhop:
 * [See Key Features](https://developer.wordhop.io)
@@ -10,7 +10,12 @@ With Wordhop you can sync up your Ruby-based Chatbot to Slack, so you can retain
 ### What you need to get started:
 * [A Slack Account](http://www.slack.com)
 * [Wordhop for Slack](https://slack.com/oauth/authorize?scope=users:read,users:read.email,commands,chat:write:bot,channels:read,channels:write,bot&client_id=23850726983.39760486257)
-* [A Chatbot built in Ruby](https://github.com/hyperoslo/facebook-messenger)
+* [A Chatbot built in Ruby](./examples/)
+
+##### Operational Dependencies:
+1.  You'll need an API key from Wordhop and for each Chatbot a Bot Token.  You can get both of those (free) when you add Wordhop to Slack and through a conversation with Wordhop. 
+2.  If you're building a Messenger Chatbot, you'll need to setup a Facebook App, Facebook Page, get the Page Access Token from Facebook and link the Facebook App to the Facebook Page for Wordhop to work.
+
 
 ### Installation
 
@@ -33,14 +38,67 @@ Wordhop.platform = "messenger"
 # Page Access Token (only required for Messenger bots)
 Wordhop.token = ENV['ACCESS_TOKEN']
 ```
+##### Incoming Message Schema:
+Throughout this documentation, you will see references to `incomingMessage`. Depending on whether you have a Messenger or Slack bot, the schema will be different. The value of `incomingMessage` should be equal to the message you receive directly from either the Messenger webhook response, or from the Slack RTM event response.
+
+```python
+# Example of a Slack Incoming Message
+{
+    "type": "message",
+    "channel": "D024BE91L",
+    "user": "U2147483697",
+    "text": "Hello world",
+    "ts": "1355517523.000005"
+}
+
+# Example of a Messenger Incoming Message
+{
+  "sender":{
+    "id":"USER_ID"
+  },
+  "recipient":{
+    "id":"PAGE_ID"
+  },
+  "timestamp":1458692752478,
+  "message":{
+    "mid":"mid.1457764197618:41d102a3e1ae206a38",
+    "seq":73,
+    "text":"hello, world!",
+    "quick_reply": {
+      "payload": "DEVELOPER_DEFINED_PAYLOAD"
+    }
+  }
+}  
+```
+
+##### Outgoing Message Schema:
+Throughout this documentation, you will see references to `outgoingMessage`. Depending on whether you have a Messenger or Slack bot, the schema, as defined by each platform, will be different. Every time you track an outgoing message, the schema requirements match the respective platform.
+
+```python
+# Example of Slack Outgoing Message
+{
+    "channel": "C024BE91L",
+    "text": "Hello world"
+}
+
+# Exmaple of Messenger Outgoing Message
+{
+  "recipient":{
+    "id":"USER_ID"
+  },
+  "message":{
+    "text":"hello, world!"
+  }
+}
+```
 
 ##### Tracking received messages:
 
-When Messenger calls your receiving webhook, you'll need to log the data with Wordhop. 
+When your bot receives an incoming message, you'll need to log the data with Wordhop by calling to `wordhop.hopIn`. 
 __Note__: Wordhop can pause your bot so that it doesn't auto response while a human has taken over. The server response from your `hopIn` request will pass the `paused` state. Use that to stop your bot from responding to an incoming message. Here is an example:
 
 ```ruby
-hopInResponse = Wordhop.hopIn(message.messaging)
+hopInResponse = Wordhop.hopIn(incomingMessage)
 if hopInResponse['paused'] != true
 # proceed to process incoming message
  ...
@@ -48,16 +106,38 @@ if hopInResponse['paused'] != true
 
 ##### Tracking sent messages:
 
-Each time your bot sends a message, make sure to log that with Wordhop in the request's callback. Here is an example:
+Each time your bot sends a message, make sure to log that with Wordhop by calling to `wordhop.hopOut`. Here is an example of a function that we're calling `sendIt` that tracks an outgoing message and at the same time, has the bot say the message:
 ```ruby
-def sendIt(message, data)
-    payload = {
-        recipient: message.sender,
-        message: data
-    }
-    message.reply(data)
-    Wordhop.hopOut(payload)
-end
+def sendIt(channel, text)
+    # schema matches Messenger
+    outgoingMessage = {recipient: {id: channel},message: {text: text}}
+    Wordhop.hopOut(outgoingMessage)
+    bot.send_text_message(channel, text) # <= example of bot sending reply
+    ...
+```
+
+##### Log Unknown Intents:
+
+Find the spot in your code your bot processes incoming messages it does not understand. Within that block of code, call to `wordhop.logUnkownIntent` to capture these conversational ‘dead-ends’. Here's an example:
+
+```ruby
+# let the user know that the bot does not understand
+sendIt(recipient_id, 'Huh?')
+# capture conversational dead-ends.
+Wordhop.logUnknownIntent(incomingMessage) 
+```
+##### Dial 0 to Speak With a Live Human Being:
+
+Wordhop can trigger alerts to suggest when a human should take over for your Chatbot. To enable this, create an intent such as when a customer explicitly requests live assistance, and then include the following lines of code where your bot listens for this intent:
+
+```ruby
+# match an intent to talk to a real human
+if text == 'help'
+    # let the user know that they are being routed to a human
+    sendIt(recipient_id, 'Hang tight. Let me see what I can do.')
+    # send a Wordhop alert to your slack channel
+    # that the user could use assistance
+    Wordhop.assistanceRequested(incomingMessage);
 ```
 
 ##### Human Take Over:
@@ -70,33 +150,9 @@ Wordhop.on :'chat response' do |data|
     Bot.deliver(data, access_token: ENV['ACCESS_TOKEN'])  # <= example of bot sending message
 end
 ```
-##### Log Unknown Intents:
-
-Find the spot in your code your bot processes incoming messages it does not understand. You may have some outgoing fallback message there (i.e. "Oops I didn't get that!"). Within that block of code, call to `wordhop.logUnkownIntent` to capture these conversational ‘dead-ends’. Here's an example:
-
-```ruby
-# let the user know that the bot does not understand
-sendIt(message, text: 'Huh?')
-# capture conversational dead-ends.
-Wordhop.logUnknownIntent(message.messaging)
-```
-##### Dial 0 to Speak With a Live Human Being:
-
-Wordhop can trigger alerts to suggest when a human should take over for your Chatbot. To enable this, create an intent such as when a customer explicitly requests live assistance, and then include the following line of code where your bot listens for this intent:
-
-```ruby
-# match an intent to talk to a real human
-if text == 'help'
-    # let the user know that they are being routed to a human
-    sendIt(message, text: 'Hang tight. Let me see what I can do.')
-    # send a Wordhop alert to your slack channel
-    # that the user could use assistance
-    Wordhop.assistanceRequested(message.messaging)
-    ...
-```
 
 Go back to Slack and wait for alerts. That's it! 
-[Be sure to check out our example.](examples/messenger/README.md)
+[Be sure to check out our examples.](./examples/)
 
 
 ### Looking for something we don't yet support?  

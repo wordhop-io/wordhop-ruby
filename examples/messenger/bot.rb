@@ -6,7 +6,7 @@ require 'rubygems'
 require 'wordhop'
 
 include Facebook::Messenger
-include Wordhop
+
 
 Wordhop.token = ENV['ACCESS_TOKEN']
 Wordhop.clientkey = ENV['WORDHOP_CLIENT_KEY']
@@ -20,7 +20,7 @@ end
 def sendIt(message, data)
     payload = {
         recipient: message.sender,
-        message: data
+        message: data   
     }
     message.reply(data)
     Wordhop.hopOut(payload)
