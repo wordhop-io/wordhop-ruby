@@ -26,6 +26,14 @@ $ gem install wordhop
 
 ### Usage
 
+Set your environmental variables for `WORDHOP_API_KEY`, `WORDHOP_CLIENT_KEY`, `ACCESS_TOKEN`.
+
+```bash
+$ export WORDHOP_API_KEY=xxxxxxxxxxxxxxxxxxxx
+$ export WORDHOP_CLIENT_KEY=xxxxxxxxxxxxxxxxxxxx
+$ export ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
 ```ruby
 require 'wordhop'
 
