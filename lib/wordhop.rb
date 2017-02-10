@@ -10,7 +10,7 @@ module Wordhop
         base_uri 'https://wordhopapi.herokuapp.com/api/v1'
     end
     
-    EVENTS = [:'chat response', :'socket_id_set'].freeze
+    EVENTS = [:'chat response', :'socket_id_set', :'channel update'].freeze
     
     class << self
     
@@ -72,6 +72,10 @@ module Wordhop
             messageData = {'recipient': {'id': channel},'message': {'text': text}}
             Wordhop.hopOut(messageData)
             Wordhop.trigger(:'chat response', messageData)
+        end
+
+        socket.on :'channel update' do |data|
+            Wordhop.trigger(:'channel update', data)
         end
 
         def on(event, &block)

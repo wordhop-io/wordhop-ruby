@@ -22,6 +22,9 @@ class Bot < SlackRubyBot::Bot
         client.say({'text': text, 'channel': channel})
     end
 
+    Wordhop.on :'channel update' do |data|
+    end
+
     command 'hi' do |client, data, _match|
         body = JSON.parse(data.to_json)
         hopInResponse = Wordhop.hopIn(body)

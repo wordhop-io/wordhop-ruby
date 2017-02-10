@@ -20,6 +20,9 @@ Wordhop.on :'chat response' do |data|
     Bot.deliver(payload, access_token: ENV['ACCESS_TOKEN'])
 end
 
+Wordhop.on :'channel update' do |data|
+end
+
 def sendIt(message, data)
     payload = {
         recipient: message.sender,

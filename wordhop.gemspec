@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name               = "wordhop"
-  s.version            = "0.0.3"
+  s.version            = "0.0.4"
   s.default_executable = "wordhop"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
